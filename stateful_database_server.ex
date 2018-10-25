@@ -1,6 +1,7 @@
 defmodule DatabaseServer do
   def start do
-    spawn(fn -> 
+    spawn(fn ->
+      # create the connection id
       connection = :rand.uniform(1000)
       loop(connection)
     end)
@@ -19,7 +20,9 @@ defmodule DatabaseServer do
   end
 
   defp loop(connection) do
+    # connection is the state we are keeping
     receive do
+      # receives a message, pattern match to determine action
       {:run_query, from_pid, query_def} ->
         query_result = run_query(connection, query_def)
         send(from_pid, {:query_result, query_result})
@@ -28,8 +31,8 @@ defmodule DatabaseServer do
     loop(connection)
   end
 
-  defp run_query(query_def) do
+  defp run_query(connection, query_def) do
     Process.sleep(2000)
-    "#{query_def} result"
+    "Connection: #{connection}: #{query_def} result"
   end
 end
