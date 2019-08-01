@@ -3,7 +3,7 @@ defmodule TodoList do
 
   def new(), do: %TodoList{}
 
-  def new(entries \\ []) do
+  def new(entries) do
     Enum.reduce(entries, %TodoList{}, &add_entry(&2, &1)) #fn entry, list_acc -> add_entry(list_acc, entry) end)
   end
 
@@ -49,8 +49,49 @@ defmodule TodoList do
     |> Stream.filter(fn {_id, entry} -> entry.date == date end)
     |> Enum.map(fn {_id, entry} -> entry end)
   end
-
-  # def due_today(list) do
-  #   MultiDict.get(list, Date.utc_today)
-  # end
 end
+
+defmodule TodoList.CsvImporter do
+  def import(file_name \\ "todos.csv") do
+    file_name
+    |> read_lines
+    |> create_entries
+    |> TodoList.new()
+  end
+
+  defp read_lines(file_name) do
+    file_name
+    |> File.stream!
+    |> Stream.map(&String.replace(&1, "\n", ""))
+  end
+
+  defp create_entries(lines) do
+    lines
+    |> Stream.map(&extract_fields/1)
+    |> Enum.map(&create_entry/1)
+  end
+
+  defp extract_fields(line) do
+    line
+    |> String.split(",")
+    |> convert_date()
+  end
+
+  defp create_entry({date, title}) do
+    %{date: date, title: title}
+  end
+
+  defp convert_date([date_string, title]) do
+    {parse_date(date_string), title}
+  end
+
+  defp parse_date(date_string) do
+    [year, month, day] = date_string
+      |> String.split("/")
+      |> Enum.map(&String.to_integer/1)
+
+    {:ok, date} = Date.new(year, month, day)
+    date
+  end
+end
+
