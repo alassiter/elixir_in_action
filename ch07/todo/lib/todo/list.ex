@@ -1,10 +1,16 @@
-defmodule TodoList do
+defmodule Todo.List do
   defstruct auto_id: 1, entries: %{}
 
-  def new(), do: %TodoList{}
+  def new(), do: %Todo.List{}
 
-  def new(entries \\ []) do
-    Enum.reduce(entries, %TodoList{}, &add_entry(&2, &1)) #fn entry, list_acc -> add_entry(list_acc, entry) end)
+  def new(entries) do
+    Enum.reduce(
+      entries,
+      %Todo.List{},
+
+      #fn entry, list_acc -> add_entry(list_acc, entry) end)
+      &add_entry(&2, &1)
+    )
   end
 
   def add_entry(list, entry) do
@@ -15,7 +21,7 @@ defmodule TodoList do
     new_entries = Map.put(list.entries, list.auto_id, entry)
 
     # Return a new list with the new entries and incr auto_id
-    %TodoList{list | entries: new_entries, auto_id: list.auto_id + 1}
+    %Todo.List{list | entries: new_entries, auto_id: list.auto_id + 1}
   end
 
   def update_entry(list, entry_id, updater_fn) do
@@ -35,7 +41,7 @@ defmodule TodoList do
         new_entries = Map.put(list.entries, new_entry.id, new_entry)
 
         # replace the list entries with the newly updated entries
-        %TodoList{list | entries: new_entries}
+        %Todo.List{list | entries: new_entries}
     end
   end
 
@@ -44,7 +50,7 @@ defmodule TodoList do
   end
 
   def delete_entry(list, entry_id) do
-    %TodoList{list | entries: Map.delete(list.entries, entry_id)}
+    %Todo.List{list | entries: Map.delete(list.entries, entry_id)}
   end
 
   def entries(list, date) do
@@ -52,8 +58,4 @@ defmodule TodoList do
     |> Stream.filter(fn {_id, entry} -> entry.date == date end)
     |> Enum.map(fn {_id, entry} -> entry end)
   end
-
-  # def due_today(list) do
-  #   MultiDict.get(list, Date.utc_today)
-  # end
 end
