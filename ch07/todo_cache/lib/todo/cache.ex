@@ -2,7 +2,7 @@ defmodule Todo.Cache do
   use GenServer
 
   def start do
-    GenServer.start(__MODULE__, nil, name: __MODULE__)
+    GenServer.start(__MODULE__, nil)
   end
 
   def server_process(cache_pid, todo_list_name) do
